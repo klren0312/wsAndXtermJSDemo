@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="node_modules/xterm/dist/xterm.css">
+  <script src="node_modules/xterm/dist/xterm.js"></script>
+</head>
+<body>
+  <div id="terminal"></div>
+  <script>
+    const term = new Terminal()
+    term.open(document.getElementById('terminal'))
+
+    term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m ')
+    let socket
+    window.onload = function() {
+      if (socket) {
+        socket.onerror = socket.onopen = socket.onclose = null;
+        socket.close();
+      }
+      initWs()
+    }
+
+    function initWs() {
+      try{
+        
+        const socket = new WebSocket(`ws://localhost:8080`)
+        console.log(WebSocket.OPEN)
+        socket.onopen = () => {
+          console.log('ws open')
+          socket.onmessage = evt => {
+            console.log(evt.data)
+            term.write('$ '+ evt.data + '\r\n')
+          }
+        }
+        socket.onclose = function(event) {
+          console.log('onclose called');
+        };
+
+        socket.onerror = function(error) {
+          console.log('onerror called');
+        };
+      } catch (error) {
+        console.log('连接ws错误')
+      }
+    }
+  </script>
+</body>
+</html>
